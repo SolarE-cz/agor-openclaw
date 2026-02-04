@@ -40,6 +40,16 @@ Get your main board ID from IDENTITY.md, then:
 - Verify worktrees are in appropriate zones
 - Detect mismatches (e.g., completed work in "In Progress" zone)
 
+**When worktree has pull_request_url:**
+- Use `gh pr view <url>` to check PR state (if gh CLI available)
+- Consider PR status + zone + recent session activity:
+  - PR approved + zone="In Progress" → May need merging
+  - PR has requested changes + zone="Ready for PR" → Move to "In Progress", address feedback
+  - PR merged + any zone → Move to "Done" zone, mark completed
+  - PR has recent comments + session idle → May need agent attention
+- Review recent PR comments for actionable feedback
+- Check CI/CD status (failing checks may need fixes)
+
 ### Running Sessions (on main board)
 - Check for blocked/stuck sessions
 - Review failed tasks needing attention
@@ -81,6 +91,12 @@ Use these Agor MCP tools for heartbeat checks:
 **Session operations:**
 - `agor_sessions_list` - List sessions (optional: boardId filter)
 - `agor_sessions_get_current` - Get your current session info
+
+**GitHub integration (when available):**
+- `gh pr view <url>` - View PR details, status, and recent comments
+- `gh pr checks <url>` - Check CI/CD status
+- `gh pr view <url> --json comments` - Get recent PR comments
+- Useful when worktree has pull_request_url field
 
 ---
 
