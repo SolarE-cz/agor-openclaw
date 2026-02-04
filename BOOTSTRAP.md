@@ -75,13 +75,11 @@ Now set up your Agor workspace. This is where the magic happens.
 **Then:**
 
 1. **List existing boards:**
-   ```typescript
-   const boards = await mcp.agor_boards_list();
-   console.log("Existing boards:", boards.map(b => b.name));
-   ```
+   - Use MCP tool: `agor_boards_list`
+   - Check the returned boards for the one user mentioned
 
 2. **Check if their board exists:**
-   - If yes: great, use it
+   - If yes: use that board_id
    - If no: ask if you should create it (may require manual creation in Agor UI)
 
 3. **Record board ID in `IDENTITY.md`:**
@@ -93,6 +91,13 @@ Now set up your Agor workspace. This is where the magic happens.
    - **Created:** [timestamp]
    ```
 
+4. **Set up `BOARD.md`:**
+   - Open `BOARD.md` template
+   - Fill in board ID and name (from step 3)
+   - Document zones if board has them
+   - Add workflow expectations
+   - See `BOARD.md` for structure and examples
+
 ### Step 2: Register Repositories
 
 **Ask:**
@@ -101,16 +106,9 @@ Now set up your Agor workspace. This is where the magic happens.
 **Then:**
 
 1. **List repos in Agor:**
-   ```typescript
-   const worktrees = await mcp.agor_worktrees_list({ limit: 100 });
-   const repoMap = new Map();
-   worktrees.forEach(wt => {
-     if (wt.repo && !repoMap.has(wt.repo.repo_id)) {
-       repoMap.set(wt.repo.repo_id, wt.repo);
-     }
-   });
-   console.log("Repos in Agor:", Array.from(repoMap.values()).map(r => r.slug));
-   ```
+   - Use MCP tool: `agor_repos_list`
+   - Check the returned repos against user's list
+   - Each repo has: repo_id, slug, name
 
 2. **Compare with user's list:**
    - Note any missing repos
@@ -144,25 +142,14 @@ Time to prove Agor integration works!
 **Then:**
 
 1. **Create a temporary worktree:**
-   ```typescript
-   const worktree = await mcp.agor_worktrees_create({
-     repoId: CONFIGURED_REPO_ID, // From step 2
-     worktreeName: 'agor-claw-hello',
-     createBranch: true,
-     sourceBranch: 'main',
-     pullLatest: true,
-     boardId: MAIN_BOARD_ID, // From step 1
-   });
-   ```
+   - Use MCP tool: `agor_worktrees_create`
+   - Parameters: repoId (from step 2), worktreeName='agor-claw-hello', createBranch=true, boardId (from step 1)
+   - Save the returned worktree_id
 
-2. **Spawn a simple session:**
-   ```typescript
-   const session = await mcp.agor_sessions_spawn({
-     prompt: "Create a file called HELLO.md with the text: 'Hello from agor-claw! 🦞'",
-     enableCallback: true,
-     includeLastMessage: true,
-   });
-   ```
+2. **Create a session in the worktree:**
+   - Use MCP tool: `agor_sessions_create`
+   - Parameters: worktreeId (from step 1), agenticTool='claude-code', initialPrompt="Create a file called HELLO.md with the text: 'Hello from agor-claw! 🦞'"
+   - Save the returned session_id
 
 3. **Report success:**
    > "✅ POC complete! I created worktree `agor-claw-hello` (ID: `[worktree_id]`) and spawned session `[session_id]`. You should see this on your '[board-name]' board in Agor!"
@@ -293,6 +280,7 @@ Before deleting this file, make sure you've:
 - [ ] Filled in USER.md about your human
 - [ ] Customized SOUL.md together
 - [ ] Set up main board in Agor
+- [ ] Filled in BOARD.md with board info and zones
 - [ ] Registered repos in `memory/agor-state/repos.json`
 - [ ] Run POC (created worktree + session)
 - [ ] Created initial daily log (`memory/YYYY-MM-DD.md`)

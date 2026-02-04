@@ -8,20 +8,59 @@ Add tasks below when you want periodic checks on Agor resources.
 
 ## Agor Resource Checks
 
-### Active Worktrees
+**Scope: Main board only** - Only check resources on YOUR main board (from `IDENTITY.md`). Don't check other users' boards unless explicitly asked.
+
+### Board & Zone Analysis
+
+**Read `BOARD.md` first** to understand zone meanings and workflow states.
+
+Zone information is now **directly available** in worktree responses (no position calculations needed):
+
+```
+Get your main board ID from IDENTITY.md, then:
+
+1. List all worktrees (use agor_worktrees_list)
+   - Each worktree includes: zone_id, zone_label, board_id
+
+2. Filter to your board (check board_id === MAIN_BOARD_ID)
+
+3. Check zone_label for each worktree:
+   - "Done: PR merged or worktree abandoned" → Mark completed, archive
+   - "Open a PR" + no pull_request_url → Create PR
+   - "In Progress" + stale last_updated → Flag as stale
+   - "Design!" → Still planning, don't expect code yet
+```
+
+**Key insight:** Zones encode workflow state. Trust `zone_label` as source of truth.
+
+### Active Worktrees (on main board)
 - Check for stale worktrees (no activity in >7 days)
 - Identify worktrees with failed CI/CD
 - Look for completed work that can be cleaned up
+- Verify worktrees are in appropriate zones
+- Detect mismatches (e.g., completed work in "In Progress" zone)
 
-### Running Sessions
+**When worktree has pull_request_url:**
+- Use `gh pr view <url>` to check PR state (if gh CLI available)
+- Consider PR status + zone + recent session activity:
+  - PR approved + zone="In Progress" → May need merging
+  - PR has requested changes + zone="Ready for PR" → Move to "In Progress", address feedback
+  - PR merged + any zone → Move to "Done" zone, mark completed
+  - PR has recent comments + session idle → May need agent attention
+- Review recent PR comments for actionable feedback
+- Check CI/CD status (failing checks may need fixes)
+
+### Running Sessions (on main board)
 - Check for blocked/stuck sessions
 - Review failed tasks needing attention
 - Identify sessions waiting for callbacks
+- Track session genealogy for complex workflows
 
 ### Board Organization
-- Review board zones and organization
-- Move completed worktrees to archive zone
+- Review zone usage and organization
+- Move completed worktrees to appropriate zones
 - Update worktree notes/metadata if stale
+- Use `worktrees.set_zone` to organize work
 
 ---
 
@@ -32,6 +71,32 @@ Add tasks below when you want periodic checks on Agor resources.
 - Update `MEMORY.md` with significant learnings
 - Sync `memory/agor-state/` with current Agor state
 - Commit workspace changes if modified
+
+---
+
+## Available MCP Tools
+
+Use these Agor MCP tools for heartbeat checks:
+
+**Board and zone information:**
+- `agor_boards_get` - Get board with zones (requires: boardId)
+- Returns board.objects array with zone definitions
+
+**Worktree operations:**
+- `agor_worktrees_list` - List all worktrees (zone_id and zone_label included automatically)
+- `agor_worktrees_get` - Get specific worktree with zone info (requires: worktreeId)
+- `agor_worktrees_set_zone` - Move worktree to zone (requires: worktreeId, zoneId)
+- `agor_worktrees_update` - Update metadata (requires: worktreeId, optional: notes, issueUrl, etc.)
+
+**Session operations:**
+- `agor_sessions_list` - List sessions (optional: boardId filter)
+- `agor_sessions_get_current` - Get your current session info
+
+**GitHub integration (when available):**
+- `gh pr view <url>` - View PR details, status, and recent comments
+- `gh pr checks <url>` - Check CI/CD status
+- `gh pr view <url> --json comments` - Get recent PR comments
+- Useful when worktree has pull_request_url field
 
 ---
 
