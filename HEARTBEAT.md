@@ -16,27 +16,19 @@ Add tasks below when you want periodic checks on Agor resources.
 
 Zone information is now **directly available** in worktree responses (no position calculations needed):
 
-```typescript
-// Get your main board ID from IDENTITY.md
-const MAIN_BOARD_ID = '[from IDENTITY.md]';
+```
+Get your main board ID from IDENTITY.md, then:
 
-// List worktrees on your board - zone_id and zone_label are included!
-const worktrees = await agor.worktrees.list();
-const myWorktrees = worktrees.data.filter(wt => wt.board_id === MAIN_BOARD_ID);
+1. List all worktrees (use agor_worktrees_list)
+   - Each worktree includes: zone_id, zone_label, board_id
 
-// Zone fields are directly available
-myWorktrees.forEach(wt => {
-  console.log(`${wt.name}: ${wt.zone_label || 'no zone'}`);
+2. Filter to your board (check board_id === MAIN_BOARD_ID)
 
-  // Take actions based on zone
-  if (wt.zone_label === 'Done: PR merged or worktree abandoned') {
-    // Mark completed, archive from tracking
-  } else if (wt.zone_label === 'Open a PR' && !wt.pull_request_url) {
-    // Ready for PR but none created yet
-  } else if (wt.zone_label === 'In Progress' && isStale(wt)) {
-    // Active work but no recent activity
-  }
-});
+3. Check zone_label for each worktree:
+   - "Done: PR merged or worktree abandoned" → Mark completed, archive
+   - "Open a PR" + no pull_request_url → Create PR
+   - "In Progress" + stale last_updated → Flag as stale
+   - "Design!" → Still planning, don't expect code yet
 ```
 
 **Key insight:** Zones encode workflow state. Trust `zone_label` as source of truth.
@@ -76,34 +68,19 @@ myWorktrees.forEach(wt => {
 
 Use these Agor MCP tools for heartbeat checks:
 
-```typescript
-// Get board information with zones
-const board = await agor.boards.get({ boardId: MAIN_BOARD_ID });
+**Board and zone information:**
+- `agor_boards_get` - Get board with zones (requires: boardId)
+- Returns board.objects array with zone definitions
 
-// List worktrees (zone_id and zone_label included automatically)
-const worktrees = await agor.worktrees.list();
+**Worktree operations:**
+- `agor_worktrees_list` - List all worktrees (zone_id and zone_label included automatically)
+- `agor_worktrees_get` - Get specific worktree with zone info (requires: worktreeId)
+- `agor_worktrees_set_zone` - Move worktree to zone (requires: worktreeId, zoneId)
+- `agor_worktrees_update` - Update metadata (requires: worktreeId, optional: notes, issueUrl, etc.)
 
-// Get specific worktree with zone info
-const wt = await agor.worktrees.get({ worktreeId });
-
-// Move worktree to zone
-await agor.worktrees.set_zone({
-  worktreeId,
-  zoneId: 'zone-1234567890',
-});
-
-// Update worktree metadata
-await agor.worktrees.update({
-  worktreeId,
-  notes: 'Updated status',
-});
-
-// List sessions on board
-const sessions = await agor.sessions.list({ boardId: MAIN_BOARD_ID });
-
-// Get current session
-const currentSession = await agor.sessions.get_current();
-```
+**Session operations:**
+- `agor_sessions_list` - List sessions (optional: boardId filter)
+- `agor_sessions_get_current` - Get your current session info
 
 ---
 
