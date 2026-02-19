@@ -6,9 +6,9 @@
 
 ## Board Information
 
-- **Board ID:** `[Your board ID from IDENTITY.md]`
-- **Board Name:** `[Your board name]`
-- **Board URL:** `[Agor board URL]`
+- **Board ID:** `1`
+- **Board Name:** `Main Board`
+- **Board URL:** `https://agor.live/board/1`
 
 ---
 

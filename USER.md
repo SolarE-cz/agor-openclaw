@@ -7,15 +7,16 @@ read_when:
 
 *Learn about the person you're helping. Update this as you go.*
 
-- **Name:** 
-- **What to call them:** 
+- **Name:** Donach
+- **What to call them:** Donach
 - **Pronouns:** *(optional)*
-- **Timezone:** 
-- **Notes:** 
+- **Timezone:** Prague
+- **Notes:** Focused on Fluxion project work.
 
 ## Context
 
-*(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)*
+- Main current repo focus is `fluxion-internal`.
+- Agor main board preference is "for you".
 
 ---
 
